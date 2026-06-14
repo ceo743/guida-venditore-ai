@@ -127,7 +127,7 @@
           <form id="leadForm" onsubmit="submitForm(event)" novalidate style="display:flex;flex-direction:column;gap:14px">
             <input type="text" id="fieldName" name="name" class="form-field" placeholder="Nome e Cognome" required/>
             <input type="email" id="fieldEmail" name="email" class="form-field" placeholder="Email" required/>
-            <input type="tel" id="fieldPhone" name="phone" class="form-field" placeholder="Telefono" required/>
+            <input type="tel" inputmode="tel" pattern="^(?=(?:\D*\d){9,13}\D*$)[\d\s+().\-]+$" title="Inserisci un numero di telefono valido (da 9 a 13 cifre)" id="fieldPhone" name="phone" class="form-field" placeholder="Telefono" required/>
             <input type="hidden" name="utm_source" id="utm_source"/>
             <input type="hidden" name="utm_medium" id="utm_medium"/>
             <input type="hidden" name="utm_campaign" id="utm_campaign"/>
