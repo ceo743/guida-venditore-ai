@@ -242,6 +242,7 @@ drawParticles();window.addEventListener('resize',drawParticles);
 })();
 
 // ===== FORM SUBMIT =====
+function dcPhoneOk(raw){var p=String(raw||'').replace(/[\s\-\+\.\(\)]/g,'');if(p.slice(0,2)==='00')p=p.slice(2);if(!/^\d+$/.test(p))return false;if(p.length<9||p.length>13)return false;if(/^(\d)\1+$/.test(p))return false;if('01234567890'.indexOf(p)>=0||'09876543210'.indexOf(p)>=0)return false;var u={},n=0,i;for(i=0;i<p.length;i++){if(!u[p[i]]){u[p[i]]=1;n++;}}if(n<3)return false;return true;}
 function submitForm(e){
   e.preventDefault();
   var fieldName=document.getElementById('fieldName');
@@ -256,8 +257,7 @@ function submitForm(e){
     if(!f.value.trim()){f.classList.add('error');hasError=true}
   });
   if(fieldEmail.value.trim()&&!/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(fieldEmail.value.trim())){fieldEmail.classList.add('error');hasError=true;}
-  var cleanPhone=fieldPhone.value.trim().replace(/[\s\-\+\.]/g,'');
-  if(fieldPhone.value.trim()&&(!/^\d+$/.test(cleanPhone)||cleanPhone.length<9||cleanPhone.length>13)){fieldPhone.classList.add('error');hasError=true;}
+  if(!dcPhoneOk(fieldPhone.value)){fieldPhone.classList.add('error');hasError=true;}
   if(!privacy.checked){privacy.classList.add('checkbox-error');hasError=true}
   if(hasError) return;
   fields.forEach(function(f){f.addEventListener('input',function(){f.classList.remove('error')},{once:true})});
