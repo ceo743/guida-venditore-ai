@@ -140,7 +140,8 @@
               <input type="checkbox" id="fieldMarketing" style="margin-top:3px;accent-color:#D4AF37;width:16px;height:16px;flex-shrink:0"/>
               <span style="font-size:11px;color:rgba(255,255,255,0.3);line-height:1.5">Acconsento a ricevere comunicazioni commerciali via email (facoltativo)</span>
             </div>
-            <button type="submit" class="btn-gold" id="submitBtn" style="margin-top:8px;font-size:13px;padding:20px 48px">
+            <div id="formErrore" role="alert" style="display:none;background:rgba(229,72,77,0.12);border:1px solid #e5484d;border-radius:10px;padding:11px 13px;font-size:13px;color:#ff9b9b;line-height:1.55;text-align:left;margin:4px 0"></div>
+<button type="submit" class="btn-gold" id="submitBtn" style="margin-top:8px;font-size:13px;padding:20px 48px">
               <span id="btnText">SCARICA LA GUIDA GRATUITA &rarr;</span>
             </button>
           </form>
@@ -243,6 +244,39 @@ drawParticles();window.addEventListener('resize',drawParticles);
 
 // ===== FORM SUBMIT =====
 function dcPhoneOk(raw){var p=String(raw||'').replace(/[\s\-\+\.\(\)]/g,'');if(p.slice(0,2)==='00')p=p.slice(2);if(!/^\d+$/.test(p))return false;if(p.length<9||p.length>13)return false;if(/^(\d)\1+$/.test(p))return false;if('01234567890'.indexOf(p)>=0||'09876543210'.indexOf(p)>=0)return false;var u={},n=0,i;for(i=0;i<p.length;i++){if(!u[p[i]]){u[p[i]]=1;n++;}}if(n<3)return false;return true;}
+/* La conferma non parte piu' da un timer: si mostra solo se la richiesta e'
+   andata a buon fine davvero. Se fallisce compare un riquadro con l'indirizzo
+   a cui scrivere, e il pulsante torna cliccabile. */
+var ERR_ISCRIZIONE='Non siamo riusciti a registrare la tua richiesta. Riprova tra un istante, oppure scrivi a <a href=\"mailto:academy@davidecaiazzo.it\" style=\"color:#ff3d2e\">academy@davidecaiazzo.it</a> e ci pensiamo noi.';
+(function(){
+  function cattura(){var b=document.getElementById('btnText');if(b&&!window.__testoPulsante)window.__testoPulsante=b.textContent;}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cattura);}else{cattura();}
+})();
+function mostraErroreIscrizione(testo){
+  var btn=document.getElementById('submitBtn');
+  if(btn){btn.disabled=false;}
+  var bt=document.getElementById('btnText');
+  if(bt&&window.__testoPulsante){bt.textContent=window.__testoPulsante;}
+  var box=document.getElementById('formErrore');
+  if(!box){alert(testo.replace(/<[^>]*>/g,''));return;}
+  box.innerHTML=testo;
+  box.style.display='block';
+  box.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function mostraConfermaIscrizione(){
+      document.getElementById('confirmModal').classList.add('open');
+      var sec = 3;
+      var countEl = document.getElementById('countdownSec');
+      var timer = setInterval(function(){
+        sec--;
+        countEl.textContent = sec;
+        if(sec <= 0){
+          clearInterval(timer);
+          window.location.href = 'https://automazioni.davidecaiazzo.it/';
+        }
+      }, 1000);
+  
+}
 function submitForm(e){
   e.preventDefault();
   var fieldName=document.getElementById('fieldName');
@@ -279,20 +313,15 @@ function submitForm(e){
   fetch('https://hooks.zapier.com/hooks/catch/6421650/4bvdt03/',{
     method:'POST',
     body:data
-  }).catch(function(){});
-  setTimeout(function(){
-    document.getElementById('confirmModal').classList.add('open');
-    var sec = 3;
-    var countEl = document.getElementById('countdownSec');
-    var timer = setInterval(function(){
-      sec--;
-      countEl.textContent = sec;
-      if(sec <= 0){
-        clearInterval(timer);
-        window.location.href = 'https://automazioni.davidecaiazzo.it/';
-      }
-    }, 1000);
-  }, 800);
+  }).then(function(r){
+    if(!r.ok){throw new Error('esito negativo');}
+    return r.text();
+  }).then(function(t){
+    if(t&&t.indexOf('"status"')>-1&&t.indexOf('success')===-1){throw new Error('rifiutata');}
+    mostraConfermaIscrizione();
+  },function(){
+    mostraErroreIscrizione(ERR_ISCRIZIONE);
+  });
 }
 </script>
 </body>
